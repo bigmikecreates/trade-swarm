@@ -53,6 +53,31 @@ Multi-asset trading agent system built on walk-forward validated strategies and 
 4. **Asset class diversification requires strategy diversification** — each asset class has distinct microstructure requiring its own strategy type.
 5. **Drawdown is the binding constraint** — Sharpe is achievable; max DD < 20% is what kills most configurations.
 
+### Generating diagrams
+
+The v0.1.0 branch includes a diagram generator (`scripts/generate_mmd_diagrams.py`) that produces Mermaid flowcharts from the codebase and version spec files. Four diagram types are available:
+
+| Type | What it shows |
+|------|---------------|
+| **Class model** | Static structure — modules, classes, methods, and their relationships |
+| **Data flow** | How data moves: Yahoo Finance -> indicators -> agent -> backtest -> gate |
+| **Runtime call graph** | Step-by-step execution when `run_backtest()` runs, including the HMM branch |
+| **Spec plan** | High-level build plan extracted from YAML front-matter in each version spec |
+
+```bash
+# Generate .mmd source files only (no Node.js required)
+python scripts/generate_mmd_diagrams.py --src-only
+
+# Generate .mmd + render .svg (requires Node.js + @mermaid-js/mermaid-cli)
+python scripts/generate_mmd_diagrams.py
+
+# Target a specific version, or generate all
+python scripts/generate_mmd_diagrams.py --version v0.1.0
+python scripts/generate_mmd_diagrams.py --all
+```
+
+The script auto-detects the current branch version, so running it on the `v0.1.0` branch generates only v0.1.0 diagrams. Output goes to `planning/diagrams/` organized by type. Spec plan diagrams are driven by YAML front-matter in each version's spec file — adding a `spec_diagram:` block to any future version spec automatically generates its diagram.
+
 ### Open research questions
 
 | ID | Question | Target |
