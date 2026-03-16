@@ -55,14 +55,25 @@ Multi-asset trading agent system built on walk-forward validated strategies and 
 
 ### Generating diagrams
 
-The v0.1.0 branch includes a diagram generator (`scripts/generate_mmd_diagrams.py`) that produces Mermaid flowcharts from the codebase and version spec files. Four diagram types are available:
+The v0.1.0 branch includes a diagram generator (`scripts/generate_mmd_diagrams.py`) that produces Mermaid flowcharts serving two roles in the spec-driven development process.
+
+**Prescriptive — what we plan to build** (spec is the source of truth):
+
+| Type | What it shows |
+|------|---------------|
+| **Spec plan** | High-level build plan extracted from YAML front-matter in each version spec |
+
+Spec plan diagrams are generated directly from the `spec_diagram:` block in each version's spec file (e.g., `planning/system_specs/v0.1.0/v0.1.0.md`). The spec defines the build steps and dependencies; the diagram visualizes that plan. Adding a `spec_diagram:` block to any future version spec automatically generates its diagram — no code changes needed.
+
+**Descriptive — what we built** (code is the source of truth):
 
 | Type | What it shows |
 |------|---------------|
 | **Class model** | Static structure — modules, classes, methods, and their relationships |
 | **Data flow** | How data moves: Yahoo Finance -> indicators -> agent -> backtest -> gate |
 | **Runtime call graph** | Step-by-step execution when `run_backtest()` runs, including the HMM branch |
-| **Spec plan** | High-level build plan extracted from YAML front-matter in each version spec |
+
+These three document the v0.1.0 codebase as-built. They are hand-authored in the script to match the actual implementation, providing architecture documentation for each completed version.
 
 ```bash
 # Generate .mmd source files only (no Node.js required)
@@ -76,7 +87,7 @@ python scripts/generate_mmd_diagrams.py --version v0.1.0
 python scripts/generate_mmd_diagrams.py --all
 ```
 
-The script auto-detects the current branch version, so running it on the `v0.1.0` branch generates only v0.1.0 diagrams. Output goes to `planning/diagrams/` organized by type. Spec plan diagrams are driven by YAML front-matter in each version's spec file — adding a `spec_diagram:` block to any future version spec automatically generates its diagram.
+The script auto-detects the current branch version, so running it on the `v0.1.0` branch generates only v0.1.0 diagrams. Output goes to `planning/diagrams/` organized by type.
 
 ### Open research questions
 
