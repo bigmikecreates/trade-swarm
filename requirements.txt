@@ -1,0 +1,9 @@
+yfinance
+pandas
+numpy
+flask
+hmmlearn
+scikit-learn
+# Optional (Python 3.10-3.13 only):
+# pandas-ta
+# vectorbt

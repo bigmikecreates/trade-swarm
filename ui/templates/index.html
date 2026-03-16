@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trade-Swarm v0.1.0</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Trade-Swarm <span class="version">v0.1.0</span></h1>
+    <nav>
+      <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+      <button class="tab-btn" data-tab="backtest">Backtest</button>
+      <button class="tab-btn" data-tab="signal">Signal</button>
+      <button class="tab-btn" data-tab="experiments">Experiments</button>
+      <button class="tab-btn" data-tab="diagrams">Diagrams</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Dashboard -->
+    <section id="tab-dashboard" class="tab-panel active">
+      <h2>Dashboard</h2>
+      <div class="card-row">
+        <div class="card" id="config-card">
+          <h3>Strategy Config</h3>
+          <div id="config-display" class="mono">Loading...</div>
+        </div>
+        <div class="card" id="gate-card">
+          <h3>Gate Status</h3>
+          <div id="gate-display">Run a backtest first</div>
+        </div>
+      </div>
+      <div class="card" id="dash-metrics-card">
+        <h3>Latest Metrics</h3>
+        <div id="dash-metrics">No results yet. Go to <strong>Backtest</strong> tab and run one.</div>
+      </div>
+    </section>
+
+    <!-- Backtest -->
+    <section id="tab-backtest" class="tab-panel">
+      <h2>Backtest</h2>
+      <div class="card">
+        <h3>Parameters</h3>
+        <form id="bt-form" class="param-grid">
+          <label>Symbol <input type="text" name="symbol" value="EURUSD=X"></label>
+          <label>Period <input type="text" name="period" value="2y"></label>
+          <label>Interval <input type="text" name="interval" value="1h"></label>
+          <label>EMA Fast <input type="number" name="ema_fast" value="20" min="1"></label>
+          <label>EMA Slow <input type="number" name="ema_slow" value="50" min="1"></label>
+          <label>ADX Threshold <input type="number" name="adx_threshold" value="25" min="0"></label>
+          <label class="checkbox-label"><input type="checkbox" name="use_regime"> HMM Regime Filter</label>
+          <label>Init Cash <input type="number" name="init_cash" value="10000" min="1"></label>
+          <label>Fee Rate <input type="number" name="fee_rate" value="0.001" step="0.0001" min="0"></label>
+          <div class="form-actions">
+            <button type="submit" id="bt-run-btn">Run Backtest</button>
+            <span id="bt-status"></span>
+          </div>
+        </form>
+      </div>
+      <div class="card" id="bt-results-card" style="display:none;">
+        <h3>Results</h3>
+        <div class="card-row">
+          <div id="bt-metrics"></div>
+          <div id="bt-gate"></div>
+        </div>
+      </div>
+      <div class="card" id="bt-equity-card" style="display:none;">
+        <h3>Equity Curve</h3>
+        <canvas id="equity-chart"></canvas>
+      </div>
+      <div class="card" id="bt-price-card" style="display:none;">
+        <h3>Price + Signals</h3>
+        <canvas id="price-chart"></canvas>
+      </div>
+    </section>
+
+    <!-- Signal -->
+    <section id="tab-signal" class="tab-panel">
+      <h2>Signal Agent</h2>
+      <div class="card">
+        <h3>Generate Signal</h3>
+        <form id="sig-form" class="param-grid">
+          <label>Symbol <input type="text" name="symbol" value="EURUSD=X"></label>
+          <label>Period <input type="text" name="period" value="2y"></label>
+          <label>Interval <input type="text" name="interval" value="1h"></label>
+          <div class="form-actions">
+            <button type="submit" id="sig-run-btn">Generate</button>
+            <span id="sig-status"></span>
+          </div>
+        </form>
+      </div>
+      <div class="card" id="sig-result-card" style="display:none;">
+        <div id="sig-direction-badge" class="direction-badge"></div>
+        <div class="signal-grid" id="sig-details"></div>
+      </div>
+    </section>
+
+    <!-- Experiments -->
+    <section id="tab-experiments" class="tab-panel">
+      <h2>Experiment Log <span class="version" id="exp-version-label"></span></h2>
+      <div class="card">
+        <div id="exp-table-container">Loading...</div>
+      </div>
+    </section>
+
+    <!-- Diagrams -->
+    <section id="tab-diagrams" class="tab-panel">
+      <h2>Mermaid Diagrams</h2>
+      <div class="card">
+        <label for="diagram-select">Select diagram:</label>
+        <select id="diagram-select">
+          <option value="">-- choose --</option>
+        </select>
+      </div>
+      <div class="card" id="diagram-render-card" style="display:none;">
+        <div id="mermaid-container"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
