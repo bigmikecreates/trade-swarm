@@ -80,6 +80,46 @@ def _label_states(model: GaussianHMM, n_states: int = 3) -> dict[int, Regime]:
     }
 
 
+def fit_regime_model(
+    df: pd.DataFrame,
+    n_states: int = 3,
+    window: int = _ROLLING_WINDOW,
+    n_iter: int = 100,
+    random_state: int = 42,
+) -> tuple[GaussianHMM, dict[int, "Regime"]]:
+    """Fit an HMM on training data and return the model + label map.
+
+    Use this with `predict_regimes()` for walk-forward validation where the
+    model must be trained on one window and applied to another.
+    """
+    features = _build_features(df, window=window)
+    model = GaussianHMM(
+        n_components=n_states,
+        covariance_type="full",
+        n_iter=n_iter,
+        random_state=random_state,
+    )
+    model.fit(features.values)
+    label_map = _label_states(model, n_states)
+    return model, label_map
+
+
+def predict_regimes(
+    df: pd.DataFrame,
+    model: GaussianHMM,
+    label_map: dict[int, "Regime"],
+    window: int = _ROLLING_WINDOW,
+) -> pd.Series:
+    """Predict regime labels on new data using a pre-fitted HMM."""
+    features = _build_features(df, window=window)
+    hidden_states = model.predict(features.values)
+    return pd.Series(
+        [label_map[s] for s in hidden_states],
+        index=features.index,
+        name="regime",
+    )
+
+
 def detect_regimes(
     df: pd.DataFrame,
     n_states: int = 3,
@@ -87,35 +127,9 @@ def detect_regimes(
     n_iter: int = 100,
     random_state: int = 42,
 ) -> pd.Series:
-    """Fit an HMM and return a Regime label per bar.
+    """Fit an HMM and return a Regime label per bar (train and predict on same data).
 
-    Args:
-        df: OHLCV DataFrame with at least a 'Close' column.
-        n_states: Number of hidden states (default 3).
-        window: Rolling window for feature construction.
-        n_iter: Max EM iterations for fitting.
-        random_state: Seed for reproducibility.
-
-    Returns:
-        pd.Series of Regime values, indexed to match `df` (NaN-rows from
-        feature construction are excluded — the series is shorter than df).
+    For walk-forward validation, use `fit_regime_model()` + `predict_regimes()` instead.
     """
-    features = _build_features(df, window=window)
-    X = features.values
-
-    model = GaussianHMM(
-        n_components=n_states,
-        covariance_type="full",
-        n_iter=n_iter,
-        random_state=random_state,
-    )
-    model.fit(X)
-    hidden_states = model.predict(X)
-
-    label_map = _label_states(model, n_states)
-    labels = pd.Series(
-        [label_map[s] for s in hidden_states],
-        index=features.index,
-        name="regime",
-    )
-    return labels
+    model, label_map = fit_regime_model(df, n_states, window, n_iter, random_state)
+    return predict_regimes(df, model, label_map, window)

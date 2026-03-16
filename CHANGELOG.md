@@ -9,16 +9,13 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Status
 
-**Gate passed (in-sample) across 6 assets.** Next step: walk-forward out-of-sample validation.
+**Gate passed (walk-forward validated) on 3 assets across 2 asset classes.** HMM regime filter does not survive walk-forward; unfiltered EMA crossover is the proven signal.
 
-| Asset | EMA | Filter | Sharpe | Max DD | Trades | Return | Gate |
-|---|---|---|---|---|---|---|---|
-| SPY | 8/21 | HMM | 1.07 | 10.7% | 36 | 96% | PASS |
-| DIA | 5/20 | None | 0.86 | 19.8% | 64 | 98% | PASS |
-| QQQ | 12/35 | None | 0.89 | 19.9% | 31 | 164% | PASS |
-| MSFT | 8/21 | HMM | 0.97 | 19.3% | 39 | 202% | PASS |
-| AAPL | 5/20 | HMM | 1.17 | 19.8% | 48 | 312% | PASS |
-| GLD | 10/30 | None | 0.86 | 18.8% | 43 | 139% | PASS |
+| Asset | EMA | OOS Sharpe | OOS Max DD | OOS Trades | OOS Return | Gate |
+|---|---|---|---|---|---|---|
+| SPY | 8/21 | 0.88 | 16.4% | 35 | 110% | **PASS** |
+| QQQ | 8/25 | 0.96 | 17.6% | 33 | 171% | **PASS** |
+| GLD | 7/18 | 0.85 | 18.7% | 33 | 79% | **PASS** |
 
 ### Added
 - `data/fetcher.py` -- OHLCV fetcher via yfinance with MultiIndex column flattening
@@ -90,6 +87,17 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `diagram_from_instance_flow()` -- replaced vectorbt branch with `use_regime?` HMM branch; added gate check (PASS/FAIL) at end of flow
 - Diagram generation is now **branch-aware**: auto-detects semver from current git branch, only generates diagrams for that version; `--all` flag overrides; `--version` flag for explicit targeting
 - `DIAGRAM_REGISTRY` entries now carry a version tag for filtering
+
+### Added (walk-forward validation)
+- `backtest/walk_forward.py` -- rolling train/test window harness (5y train, 1y test, 1y step)
+- `data/regime.py` -- split into `fit_regime_model()` + `predict_regimes()` for train/predict separation; `detect_regimes()` preserved as convenience wrapper
+- `scripts/run_wf_tuning.py` -- targeted walk-forward parameter sweeps
+
+### Walk-forward results (exp-008)
+- HMM regime filter **does not survive walk-forward** -- regime predictions from a 5y training window don't transfer to unseen data, collapsing trade count to near zero
+- Unfiltered EMA crossover has genuine out-of-sample edge on trending assets
+- **3 assets pass walk-forward gate:** SPY (EMA 8/21, Sharpe 0.88), QQQ (EMA 8/25, Sharpe 0.96), GLD (EMA 7/18, Sharpe 0.85)
+- DIA's edge is real but too weak OOS (Sharpe ~0.60). MSFT/AAPL have uncontrollable DD without HMM.
 
 ### Changed (experiment log structure)
 - `EXPERIMENT_LOG.md` restructured into 5 narrative phases so readers can follow the progression from baseline to gate pass

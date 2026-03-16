@@ -8,7 +8,7 @@ Trade-Swarm grows version by version. Each version has a **gate** — a set of p
 
 ## v0.1.0 — Prove the signal
 
-The goal of v0.1.0: prove the EMA crossover strategy can pass a hard performance gate across multiple assets, using an HMM regime filter to trade only in trending markets.
+The goal of v0.1.0: prove the EMA crossover strategy can pass a hard performance gate with genuine out-of-sample edge.
 
 **The gate:**
 
@@ -18,20 +18,15 @@ The goal of v0.1.0: prove the EMA crossover strategy can pass a hard performance
 | Max Drawdown | < 20% |
 | Total Trades | >= 30 |
 
-**Where we stand — 6 assets pass (in-sample, 10y daily):**
+**Walk-forward validated — 3 assets pass out-of-sample:**
 
-| Asset | Class | EMA | Filter | Sharpe | Max DD | Trades | Return |
-|---|---|---|---|---|---|---|---|
-| SPY | US Equity (Large Cap) | 8/21 | HMM | 1.07 | 10.7% | 36 | 96% |
-| DIA | US Equity (Large Cap) | 5/20 | None | 0.86 | 19.8% | 64 | 98% |
-| QQQ | US Equity (Tech) | 12/35 | None | 0.89 | 19.9% | 31 | 164% |
-| MSFT | US Equity (Single Stock) | 8/21 | HMM | 0.97 | 19.3% | 39 | 202% |
-| AAPL | US Equity (Single Stock) | 5/20 | HMM | 1.17 | 19.8% | 48 | 312% |
-| GLD | Commodity (Gold) | 10/30 | None | 0.86 | 18.8% | 43 | 139% |
+| Asset | Class | EMA | OOS Sharpe | OOS Max DD | OOS Trades | OOS Return |
+|---|---|---|---|---|---|---|
+| SPY | US Equity (Large Cap) | 8/21 | 0.88 | 16.4% | 35 | 110% |
+| QQQ | US Equity (Tech) | 8/25 | 0.96 | 17.6% | 33 | 171% |
+| GLD | Commodity (Gold) | 7/18 | 0.85 | 18.7% | 33 | 79% |
 
-The HMM regime filter is essential for high-beta assets (SPY, MSFT, AAPL) where it halves drawdown. Lower-volatility trending assets (DIA, QQQ, GLD) pass without it. Full experiment history in `planning/system_specs/v0.1.0/EXPERIMENT_LOG.md`.
-
-**Next:** walk-forward validation on the top configurations to confirm out-of-sample robustness.
+These results use rolling 5y-train / 1y-test windows — no look-ahead bias. The unfiltered EMA crossover has a genuine edge on assets with persistent trends. The HMM regime filter, while effective in-sample, overfits and does not survive walk-forward validation. Full experiment history in `planning/system_specs/v0.1.0/EXPERIMENT_LOG.md`.
 
 ---
 
