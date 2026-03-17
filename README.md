@@ -1,8 +1,8 @@
 # Trade-Swarm
 
-A multi-agent trading system built around a simple idea: no feature ships until the strategy proves it works.
+Trade-Swarm is a multi-agent trading system designed to deliver disciplined, risk-aware performance in live market conditions. Instead of relying on a single strategy, it coordinates multiple decision-making agents—each responsible for signal generation, risk control, and execution—to produce more robust and adaptive trading outcomes.
 
-Trade-Swarm grows version by version. Each version has a **gate** — a set of performance thresholds the strategy must pass before new capabilities are unlocked. This keeps the system honest and experiment-driven.
+Every component within the system is introduced only after meeting strict performance and risk standards **(gates)**, ensuring that improvements translate into real, measurable results rather than added complexity.
 
 ---
 
@@ -27,6 +27,16 @@ The goal of v0.1.0: prove the EMA crossover strategy can pass a hard performance
 | GLD | Commodity (Gold) | 7/18 | 0.85 | 18.7% | 33 | 79% |
 
 These results use rolling 5y-train / 1y-test windows — no look-ahead bias. The unfiltered EMA crossover has a genuine edge on assets with persistent trends. The HMM regime filter, while effective in-sample, overfits and does not survive walk-forward validation. Full experiment history in `planning/system_specs/v0.1.0/EXPERIMENT_LOG.md`.
+
+### Cost model
+
+All v0.1.0 backtests use a **flat 0.1% fee per trade** — no spread, slippage, commissions, or swap fees modeled. This is intentional.
+
+**Why it's sufficient for v0.1.0:** The goal was to prove the signal, not to model execution realism. The question was: does EMA crossover have genuine out-of-sample edge? The 0.1% fee is a simple, consistent assumption that lets us compare strategies and assets fairly. For liquid ETFs like SPY, QQQ, and GLD, it's a reasonable upper bound — spreads are tight and retail brokers often offer commission-free ETF trading.
+
+**Why spread, slippage, commissions, and swap are deferred:** v0.1.0 is backtest-only. Spread and slippage depend on broker, venue, and order type — modeling them in detail without execution context would be speculative. Commission and swap fees matter more for forex and leveraged positions (assets that failed the gate in v0.1.0). The methodology explicitly defers cost validation to later versions: v0.2.0 paper trading will surface real execution costs, and R6 (open research question) targets v0.4.0 for comparing live slippage against the 0.1% model.
+
+The flat fee is a deliberate simplification for the research phase — conservative enough to be useful, simple enough to keep focus on signal quality. Execution costs are validated when we actually execute.
 
 ---
 
