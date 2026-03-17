@@ -55,25 +55,25 @@ Alpaca paper trading, Redis (Docker Compose) for kill switch, 4-rule risk gate, 
 
 ### v0.3.0 — Second signal agent + regime detection
 
-Add a `MeanReversionAgent` (RSI + Bollinger Bands) for ranging markets alongside the existing `TrendSignalAgent`. Build a `RegimeAgent` to classify conditions and route to the appropriate strategy. Wire agents via Redis pub/sub.
+Add a `MeanReversionAgent` (RSI + Bollinger Bands) for ranging markets alongside the existing `TrendSignalAgent`. Build a `RegimeAgent` using simpler proxies (ADX, vol percentile) first — HMM overfitted in v0.1.0 walk-forward, but may be revisited later with different methodology. Route to the appropriate strategy based on regime. Introduce Redis pub/sub for agent coordination (v0.2.0 uses direct calls).
 
 **Exit gate:** Both agents individually profitable over 4+ weeks in paper trading, regime switching visible in logs.
 
 ### v0.4.0 — Orchestrator + risk agent + sentiment
 
-Wire all specialist agents through a LangGraph orchestrator for final trade decisions. Add a `RiskAgent` with VaR and drawdown tracking. Add a `SentimentAgent` using FinBERT on Alpaca news. Expand to 2-3 assets.
+Wire all specialist agents through a LangGraph orchestrator for final trade decisions. Add a `RiskAgent` with VaR and drawdown tracking (extends v0.2.0’s 4-rule gate). Add a `SentimentAgent` using FinBERT on Alpaca news. Expand to 2-3 assets (SPY, QQQ, GLD per v0.1.0 validation).
 
 **Exit gate:** 8 weeks paper trading, portfolio Sharpe > 1.0, max drawdown < 15%.
 
 ### v0.5.0 — Infrastructure hardening
 
-Docker containers, Postgres (replacing SQLite), Grafana monitoring, Telegram kill switch, full audit log. The system must run 48 hours unattended on a VPS with no crashes or data loss.
+Full Docker stack (app + Redis + Postgres in containers; v0.2.0 has Redis-only Compose). Postgres replaces SQLite. Grafana monitoring. Upgrade kill switch from Redis flag to Telegram for remote control. Full audit log. The system must run 48 hours unattended on a VPS with no crashes or data loss.
 
 **Exit gate:** 48h unattended run, Telegram kill switch reachable, all 16 risk gate rules active.
 
 ### v0.9.0 — Extended paper trading + ML layer
 
-3 continuous months of paper trading across all target asset classes. XGBoost ML confidence layer on top of rule-based signals. Walk-forward parameter optimization. Stress testing against 2008, 2020, and 2022 scenarios.
+3 continuous months of paper trading across all target asset classes. XGBoost ML confidence layer on top of rule-based signals. Walk-forward parameter optimization. Stress testing against 2008, 2020, and 2022 scenarios. Use paper fill data from v0.2.0–v0.4.0 to validate the 0.1% cost model before scaling.
 
 **Exit gate:** 3 months paper trading, Sharpe > 1.0, max drawdown < 15%, stress tests passed.
 
@@ -116,7 +116,7 @@ All strategies follow the walk-forward validation protocol defined in `planning/
 
 - **Walk-forward:** 5-year train / 1-year test / 1-year step, rolling windows
 - **Gate:** Sharpe > 0.8, Max DD < 20%, Trades >= 30 on concatenated OOS equity curve
-- **Cost model:** flat 0.1% per trade (to be validated against live fills in v0.4.0)
+- **Cost model:** flat 0.1% per trade (validate against paper fills in v0.2.0–v0.4.0; live in v1.0.0)
 - **Indicators:** pure pandas, no external indicator libraries
 
 ## License
