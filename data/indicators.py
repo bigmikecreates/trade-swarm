@@ -20,6 +20,16 @@ def rsi(series: pd.Series, length: int = 14) -> pd.Series:
     return 100 - (100 / (1 + rs))
 
 
+def atr(high: pd.Series, low: pd.Series, close: pd.Series, length: int = 14) -> pd.Series:
+    """Average True Range."""
+    tr = pd.concat([
+        high - low,
+        (high - close.shift(1)).abs(),
+        (low - close.shift(1)).abs(),
+    ], axis=1).max(axis=1)
+    return tr.ewm(alpha=1 / length, adjust=False).mean()
+
+
 def adx(high: pd.Series, low: pd.Series, close: pd.Series, length: int = 14) -> pd.Series:
     """Average Directional Index."""
     plus_dm = high.diff()

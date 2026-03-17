@@ -26,9 +26,17 @@ class SignalEvent:
 
 
 class TrendSignalAgent:
-    def __init__(self, symbol: str, use_regime: bool = False):
+    def __init__(
+        self,
+        symbol: str,
+        use_regime: bool = False,
+        ema_fast: int = 20,
+        ema_slow: int = 50,
+    ):
         self.symbol = symbol
         self.use_regime = use_regime
+        self.ema_fast = ema_fast
+        self.ema_slow = ema_slow
 
     def generate(self, df: pd.DataFrame) -> SignalEvent:
         df = df.copy()
@@ -36,8 +44,8 @@ class TrendSignalAgent:
         high = df["High"]
         low = df["Low"]
 
-        df["EMA_20"] = ema(close, 20)
-        df["EMA_50"] = ema(close, 50)
+        df["EMA_fast"] = ema(close, self.ema_fast)
+        df["EMA_slow"] = ema(close, self.ema_slow)
         df["ADX_14"] = adx(high, low, close, 14)
         df["RSI_14"] = rsi(close, 14)
 
@@ -51,14 +59,14 @@ class TrendSignalAgent:
         df.dropna(inplace=True)
 
         last = df.iloc[-1]
-        ema20 = last["EMA_20"]
-        ema50 = last["EMA_50"]
+        ema_fast_val = last["EMA_fast"]
+        ema_slow_val = last["EMA_slow"]
         adx_val = last["ADX_14"]
         rsi_val = last["RSI_14"]
 
-        if ema20 > ema50:
+        if ema_fast_val > ema_slow_val:
             direction = Direction.LONG
-        elif ema20 < ema50:
+        elif ema_fast_val < ema_slow_val:
             direction = Direction.SHORT
         else:
             direction = Direction.FLAT
@@ -67,10 +75,15 @@ class TrendSignalAgent:
         if self.use_regime and regime_val != Regime.TRENDING.value:
             direction = Direction.FLAT
 
-        strength = min(abs(ema20 - ema50) / ema50 * 100, 1.0)
+        strength = min(abs(ema_fast_val - ema_slow_val) / ema_slow_val * 100, 1.0)
         confidence = min(adx_val / 50, 1.0)
 
-        indicators = {"ema20": ema20, "ema50": ema50, "adx": adx_val, "rsi": rsi_val}
+        indicators = {
+            "ema_fast": ema_fast_val,
+            "ema_slow": ema_slow_val,
+            "adx": adx_val,
+            "rsi": rsi_val,
+        }
         if regime_val is not None:
             indicators["regime"] = regime_val
 

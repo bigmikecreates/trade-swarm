@@ -1,0 +1,9 @@
+# v0.2.0 — Redis for kill switch and risk gate state
+# Run: docker compose up -d
+# Stop: docker compose down
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"

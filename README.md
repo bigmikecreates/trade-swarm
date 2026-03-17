@@ -6,37 +6,41 @@ Every component within the system is introduced only after meeting strict perfor
 
 ---
 
-## v0.1.0 — Prove the signal
+## v0.1.0 — Prove the signal (summary)
 
-The goal of v0.1.0: prove the EMA crossover strategy can pass a hard performance gate with genuine out-of-sample edge.
+Walk-forward validated EMA crossover on SPY, QQQ, GLD. Gate: Sharpe > 0.8, Max DD < 20%, Trades ≥ 30. HMM regime filter overfits; unfiltered crossover passes. Full details: `planning/system_specs/v0.1.0/`, `planning/research/v0.1.0/RESEARCH.md`.
 
-**The gate:**
+---
 
-| Metric | Threshold |
-|---|---|
-| Sharpe Ratio | > 0.8 |
-| Max Drawdown | < 20% |
-| Total Trades | >= 30 |
+## v0.2.0 — Paper trading loop (current)
 
-**Walk-forward validated — 3 assets pass out-of-sample:**
+Take the validated backtest live against real market data via Alpaca paper trading. No real money.
 
-| Asset | Class | EMA | OOS Sharpe | OOS Max DD | OOS Trades | OOS Return |
-|---|---|---|---|---|---|---|
-| SPY | US Equity (Large Cap) | 8/21 | 0.88 | 16.4% | 35 | 110% |
-| QQQ | US Equity (Tech) | 8/25 | 0.96 | 17.6% | 33 | 171% |
-| GLD | Commodity (Gold) | 7/18 | 0.85 | 18.7% | 33 | 79% |
+**Prerequisites:**
+1. [Alpaca](https://alpaca.markets) paper account — sign up, generate API keys
+2. [Docker](https://docker.com) (for Redis via Docker Compose)
 
-These results use rolling 5y-train / 1y-test windows — no look-ahead bias. The unfiltered EMA crossover has a genuine edge on assets with persistent trends. The HMM regime filter, while effective in-sample, overfits and does not survive walk-forward validation. Full experiment history in `planning/system_specs/v0.1.0/EXPERIMENT_LOG.md`.
+**Setup:**
+```bash
+# 1. Start Redis
+docker compose up -d
 
-### Cost model
+# 2. Copy .env.example to .env and add your Alpaca keys (or export them)
+cp .env.example .env
+# Edit .env: ALPACA_API_KEY=..., ALPACA_SECRET_KEY=...
 
-All v0.1.0 backtests use a **flat 0.1% fee per trade** — no spread, slippage, commissions, or swap fees modeled. This is intentional.
+# 3. Install and run
+pip install -e .
+trade-swarm-paper                    # start the paper trading loop
+streamlit run dashboard/app.py       # P&L dashboard
+python scripts/activate_kill_switch.py   # emergency halt
+```
 
-**Why it's sufficient for v0.1.0:** The goal was to prove the signal, not to model execution realism. The question was: does EMA crossover have genuine out-of-sample edge? The 0.1% fee is a simple, consistent assumption that lets us compare strategies and assets fairly. For liquid ETFs like SPY, QQQ, and GLD, it's a reasonable upper bound — spreads are tight and retail brokers often offer commission-free ETF trading.
+**4-week gate:** Test locally for ~1 day first. For the full 4-week run, deploy to a VPS (DigitalOcean, Linode, etc.) — see `planning/system_specs/v0.2.0/v0.2.0.md` for the deployment workflow and latency notes.
 
-**Why spread, slippage, commissions, and swap are deferred:** v0.1.0 is backtest-only. Spread and slippage depend on broker, venue, and order type — modeling them in detail without execution context would be speculative. Commission and swap fees matter more for forex and leveraged positions (assets that failed the gate in v0.1.0). The methodology explicitly defers cost validation to later versions: v0.2.0 paper trading will surface real execution costs, and R6 (open research question) targets v0.4.0 for comparing live slippage against the 0.1% model.
+The loop skips trading when the market is closed, resets daily equity at market open, waits for order fills before logging, and computes P&L on exit.
 
-The flat fee is a deliberate simplification for the research phase — conservative enough to be useful, simple enough to keep focus on signal quality. Execution costs are validated when we actually execute.
+**Gate to exit v0.2.0:** 4 continuous weeks of paper trading, all orders logged to SQLite, P&L dashboard accurate, kill switch tested.
 
 ---
 
@@ -63,11 +67,15 @@ trade-swarm-diagrams --src-only   # generate Mermaid .mmd files
 | Module | Purpose |
 |---|---|
 | `data/fetcher.py` | OHLCV download via yfinance |
-| `data/indicators.py` | EMA, RSI, ADX — pure pandas, no numba |
+| `data/indicators.py` | EMA, RSI, ADX, ATR — pure pandas, no numba |
 | `data/regime.py` | 3-state HMM regime detector (trending / mean-reverting / volatile) |
 | `agents/signal/trend_agent.py` | EMA crossover signal agent with optional HMM regime filter |
 | `backtest/run.py` | Backtest runner with gate evaluation and regime-aware entry logic |
-| `config.py` | All tunables in one place (symbol, EMA params, gate thresholds) |
+| `brokers/alpaca_adapter.py` | Alpaca order execution (v0.2.0) |
+| `risk/gate.py` | Basic risk gate — kill switch, daily loss limit, position size, duplicate check |
+| `risk/position_sizer.py` | 1% risk per trade sizing |
+| `logging/trade_log.py` | SQLite trade audit trail |
+| `config.py` | All tunables in one place |
 
 **Dashboard** — a Flask UI with five tabs:
 

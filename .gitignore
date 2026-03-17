@@ -36,5 +36,8 @@ desktop.ini
 planning/diagrams/
 diagrams/
 
+# v0.2.0 paper trading
+data/trades.db
+
 # Misc
 *.log

@@ -1,4 +1,31 @@
-"""Configuration for v0.1.0 trading system."""
+"""Configuration for v0.1.0 / v0.2.0 trading system."""
+
+import os
+from pathlib import Path
+
+# Load .env from project root if present (for paper trading secrets)
+_env_path = Path(__file__).resolve().parent / ".env"
+if _env_path.exists():
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(_env_path)
+    except ImportError:
+        pass  # python-dotenv optional; use export or system env
+
+# Alpaca paper trading (v0.2.0) — prefer env vars, fallback to empty
+ALPACA_API_KEY = os.environ.get("ALPACA_API_KEY", "")
+ALPACA_SECRET_KEY = os.environ.get("ALPACA_SECRET_KEY", "")
+ALPACA_BASE_URL = os.environ.get("ALPACA_BASE_URL", "https://paper-api.alpaca.markets")
+PAPER_TRADING = True
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
+
+# Paper trading loop
+PAPER_SYMBOL = "SPY"  # Use validated asset from v0.1.0
+PAPER_EMA_FAST = 8    # Validated for SPY (v0.1.0)
+PAPER_EMA_SLOW = 21   # Validated for SPY (v0.1.0)
+PAPER_CHECK_INTERVAL = 300  # seconds (5 min)
+PAPER_PERIOD = "60d"
+PAPER_INTERVAL = "1d"  # Daily matches v0.1.0 validated strategy
 
 # Backtest defaults
 DEFAULT_SYMBOL = "EURUSD=X"

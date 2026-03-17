@@ -4,6 +4,11 @@ numpy
 flask
 hmmlearn
 scikit-learn
+# v0.2.0 paper trading
+alpaca-trade-api
+redis
+streamlit
+python-dotenv
 # Optional (Python 3.10-3.13 only):
 # pandas-ta
 # vectorbt

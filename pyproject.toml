@@ -1,6 +1,6 @@
 [project]
 name = "trade-swarm"
-version = "0.1.0"
+version = "0.2.0"
 description = "Trade-Swarm — multi-agent trading system."
 requires-python = ">=3.10"
 dependencies = [
@@ -10,6 +10,10 @@ dependencies = [
     "flask",
     "hmmlearn",
     "scikit-learn",
+    "alpaca-trade-api",
+    "redis",
+    "streamlit",
+    "python-dotenv",
     # "pandas-ta",  # optional: pure pandas indicators on Python 3.14+
     # "vectorbt",   # optional: requires Python 3.10-3.13 (numba)
 ]
@@ -21,9 +25,10 @@ orchestrator = ["httpx", "langgraph", "langchain"]
 trade-swarm-backtest = "backtest.run:main"
 trade-swarm-ui = "ui.app:run_app"
 trade-swarm-diagrams = "scripts.generate_mmd_diagrams:main"
+trade-swarm-paper = "main:run"
 
 [tool.setuptools]
-py-modules = ["config"]
+py-modules = ["config", "main"]
 
 [tool.setuptools.packages.find]
-include = ["agents*", "backtest*", "data*", "ui*", "scripts*"]
+include = ["agents*", "backtest*", "brokers*", "data*", "dashboard*", "logging*", "risk*", "ui*", "scripts*"]
