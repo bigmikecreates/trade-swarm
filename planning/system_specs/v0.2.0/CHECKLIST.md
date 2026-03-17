@@ -127,7 +127,7 @@
 - [x] Prerequisites: Alpaca, Docker (Redis via Compose)
 - [x] Commands: `trade-swarm-paper`, `streamlit run dashboard/app.py`, kill switch
 - [x] VPS deployment guide: `planning/system_specs/v0.2.0/VPS_DEPLOYMENT.md`
-- [ ] **CHANGELOG** — Add v0.2.0 section when ready to release
+- [x] **CHANGELOG** — v0.2.0 section added (Unreleased)
 
 ---
 

@@ -36,7 +36,7 @@ streamlit run dashboard/app.py       # P&L dashboard
 python scripts/activate_kill_switch.py   # emergency halt
 ```
 
-**4-week gate:** Test locally for ~1 day first. For the full 4-week run, deploy to a VPS (DigitalOcean, Linode, etc.) — see `planning/system_specs/v0.2.0/v0.2.0.md` for the deployment workflow and latency notes.
+**4-week gate:** Test locally for ~1 day first. For the full 4-week run, deploy to a VPS — see `planning/system_specs/v0.2.0/VPS_DEPLOYMENT.md` for the step-by-step guide (DigitalOcean, Linode, etc.).
 
 The loop skips trading when the market is closed, resets daily equity at market open, waits for order fills before logging, and computes P&L on exit.
 
@@ -52,7 +52,9 @@ pip install -e .
 
 ```bash
 trade-swarm-backtest              # run the backtest
-trade-swarm-ui                    # launch the dashboard → http://localhost:5000
+trade-swarm-ui                    # Flask dashboard → http://localhost:5000
+trade-swarm-paper                 # paper trading loop (v0.2.0)
+streamlit run dashboard/app.py   # Streamlit P&L dashboard (v0.2.0)
 trade-swarm-diagrams --src-only   # generate Mermaid .mmd files
 ```
 
@@ -77,23 +79,18 @@ trade-swarm-diagrams --src-only   # generate Mermaid .mmd files
 | `logging/trade_log.py` | SQLite trade audit trail |
 | `config.py` | All tunables in one place |
 
-**Dashboard** — a Flask UI with five tabs:
-
-| Tab | What it does |
-|---|---|
-| Dashboard | Strategy config and gate status at a glance |
-| Backtest | Run backtests with custom parameters; equity curve and price+signal charts |
-| Signal | Generate a live signal from `TrendSignalAgent` for any symbol |
-| Experiments | View the experiment log from `EXPERIMENT_LOG.md` |
-| Diagrams | Browse and render Mermaid `.mmd` diagrams |
+**Dashboards:**
+- **Flask** (`trade-swarm-ui`) — Backtest, Signal, Experiments, Diagrams
+- **Streamlit** (`streamlit run dashboard/app.py`) — P&L, trade history, cumulative returns (v0.2.0)
 
 **Planning & tooling:**
 
 | Path | Purpose |
 |---|---|
-| `planning/system_specs/` | Version specs, checklists, and experiment logs |
+| `planning/system_specs/` | Version specs, checklists, experiment logs |
+| `planning/system_specs/v0.2.0/VPS_DEPLOYMENT.md` | Step-by-step VPS deployment for 4-week gate |
 | `planning/diagrams/` | Generated Mermaid diagrams (`.mmd` + `.svg`) |
-| `scripts/generate_mmd_diagrams.py` | Generates four diagram types — Structure, Movement, Runtime, Spec Plan |
+| `scripts/generate_mmd_diagrams.py` | Four diagram types — Structure, Movement, Runtime, Spec Plan |
 
 ---
 

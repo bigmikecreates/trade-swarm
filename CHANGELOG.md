@@ -121,6 +121,32 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## Next -- v0.2.0
+## [0.2.0] - Unreleased
 
-Paper trading via Alpaca. See `planning/system_specs/v0.2.0/v0.2.0.md`.
+Paper trading loop via Alpaca. Redis (Docker Compose) for kill switch and risk gate. VPS deployment guide for 4-week gate.
+
+### Added
+- `brokers/alpaca_adapter.py` — Alpaca REST client: place orders, get positions, account equity, market clock, `wait_for_fill()`
+- `risk/position_sizer.py` — 1% risk per trade sizing
+- `risk/gate.py` — BasicRiskGate: kill switch, daily loss limit (3%), max position (10%), duplicate check; Redis backend with graceful failure handling
+- `logging/trade_log.py` — SQLite trade audit trail
+- `main.py` — Paper trading loop: market hours check, daily equity reset, signal evaluation, order placement, P&L on exit
+- `dashboard/app.py` — Streamlit P&L dashboard (trade history, cumulative returns, win rate)
+- `scripts/activate_kill_switch.py` — Remote kill switch activation
+- `docker-compose.yml` — Redis service for v0.2.0
+- `planning/system_specs/v0.2.0/CHECKLIST.md` — v0.2.0 readiness + VPS deployment checklist
+- `planning/system_specs/v0.2.0/EXPERIMENT_LOG.md` — Paper trading experiment phases
+- `planning/system_specs/v0.2.0/VPS_DEPLOYMENT.md` — 10-phase VPS deployment guide (DigitalOcean primary)
+- `.env.example` — Template for Alpaca keys, Redis URL
+- `trade-swarm-paper` CLI entry point
+
+### Changed
+- `config.py` — Alpaca keys, Redis URL, paper trading params (PAPER_SYMBOL, PAPER_EMA_FAST/SLOW, etc.); env vars via `os.environ`; python-dotenv loads `.env`
+- `data/indicators.py` — Added `atr()` for position sizing stop-loss
+- `agents/signal/trend_agent.py` — Configurable `ema_fast`, `ema_slow` for validated params (8/21 SPY)
+- `pyproject.toml` — Version 0.2.0; added alpaca-trade-api, redis, streamlit, python-dotenv; `main` in py-modules; new packages (brokers, risk, logging, dashboard)
+- `planning/system_specs/v0.2.0/v0.2.0.md` — Docker Compose for Redis, deployment workflow (local → VPS), VPS latency notes
+- README — v0.2.0 section with setup, VPS link, Quick start includes `trade-swarm-paper` and Streamlit; v0.1.0 trimmed to summary
+
+### Dependencies
+- alpaca-trade-api, redis, streamlit, python-dotenv added to pyproject.toml and requirements.txt
