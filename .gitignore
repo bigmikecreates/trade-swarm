@@ -20,3 +20,5 @@ package-lock.json
 *~
 
 diagrams/
+data/agent_activity.jsonl
+data/trades.db
