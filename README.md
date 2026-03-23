@@ -4,7 +4,7 @@ A multi-agent trading system that coordinates specialised agents across signal g
 
 **Current version: v0.2.0** · [v0.1.0 release](https://github.com/bigmikecreates/trade-swarm/releases/tag/v0.1.0)
 
-*(Check `release/version_number` for full codebase; main holds overview only).*
+*(Check branches `release/{version_number}` for full codebase; main holds overview only).*
 
 ## System Architecture
 
