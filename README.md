@@ -1,10 +1,17 @@
 # Trade-Swarm
 
-Multi-asset trading agent system built on walk-forward validated strategies and a gated version roadmap. Each version must pass quantitative performance gates before the next begins.
+A multi-agent trading system that coordinates specialised agents across signal generation, risk management, and execution to deliver adaptive, risk-aware performance in live markets.
 
 **Current version: v0.2.0** · [v0.1.0 release](https://github.com/bigmikecreates/trade-swarm/releases/tag/v0.1.0)
 
----
+## System Diagram
+
+![System architecture](assets/system_architecture.png)
+
+<blockquote>
+
+Click this [link](docs/specialist_agents/) for more information on each specialist agent.
+</blockquote>
 
 ## System status
 
