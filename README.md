@@ -4,7 +4,9 @@ A multi-agent trading system that coordinates specialised agents across signal g
 
 **Current version: v0.2.0** · [v0.1.0 release](https://github.com/bigmikecreates/trade-swarm/releases/tag/v0.1.0)
 
-## System Diagram
+*(Check `release/version_number` for full codebase; main holds overview only).*
+
+## System Architecture
 
 ![System architecture](assets/system_architecture.png)
 
@@ -89,33 +91,6 @@ Full Docker stack (app + Redis + Postgres in containers; v0.2.0 has Redis-only C
 Deploy real capital at 1-2% of intended allocation. Shadow mode (paper + live simultaneously). Scale only after 30 consecutive live trading days with no critical incidents and performance matching paper.
 
 **Exit gate:** 30 live days, performance within 20% of paper, max live drawdown < 10%.
-
----
-
-## Project structure
-
-*(Full codebase on `release/v0.1.0` and `release/v0.2.0`; main holds overview only.)*
-
-```
-trade-swarm/
-├── agents/signal/          # Signal generation agents (TrendSignalAgent)
-├── backtest/               # Backtesting engine + walk-forward validation
-├── brokers/                # Alpaca adapter (v0.2.0)
-├── dashboard/              # Streamlit P&L dashboard (v0.2.0)
-├── data/                   # Data fetching, indicators, regime detection
-├── logging/                # SQLite trade log (v0.2.0)
-├── risk/                   # Position sizer, risk gate (v0.2.0)
-├── planning/
-│   ├── research/           # Versioned research journals + methodology
-│   └── system_specs/      # Version specs, checklists, VPS deployment guide
-├── scripts/                # Experiment runners, kill switch
-├── ui/                     # Flask dashboard (Backtest, Signal, Experiments)
-├── docker-compose.yml      # Redis (v0.2.0)
-├── config.py               # Central configuration
-├── main.py                 # Paper trading loop (v0.2.0)
-├── pyproject.toml          # Package metadata
-└── requirements.txt        # Dependencies
-```
 
 ## Methodology
 
