@@ -73,7 +73,8 @@ class BasicRiskGate:
         # Rule 3: max position size (10% of account)
         notional = order.get("size", 0) * order.get("price", 0)
         pos_pct = notional / current_equity if current_equity > 0 else 1.0
-        if pos_pct > 0.10:
+        # Tolerance: rounded share size * price can slightly exceed 10% in float math
+        if notional > current_equity * 0.10 + 0.01:
             return GateDecision(
                 GateResult.BLOCK,
                 "max_position",

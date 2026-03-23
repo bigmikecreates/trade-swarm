@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime
 from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parents[2] / "data" / "trades.db"
+DB_PATH = Path(__file__).resolve().parents[1] / "data" / "trades.db"
 
 
 def init_db():

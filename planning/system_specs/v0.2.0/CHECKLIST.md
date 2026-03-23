@@ -8,11 +8,11 @@
 
 ## 1. Alpaca Paper Account
 
-- [ ] Signed up at alpaca.markets
-- [ ] Paper API keys generated
-- [ ] Keys added to `config.py` (or loaded from env — do not commit secrets)
-- [ ] `ALPACA_BASE_URL = "https://paper-api.alpaca.markets"` confirmed
-- [ ] Test connection: `broker.get_account_equity()` returns a value
+- [x] Signed up at alpaca.markets
+- [x] Paper API keys generated
+- [x] Keys added to `config.py` (or loaded from env — do not commit secrets)
+- [x] `ALPACA_BASE_URL = "https://paper-api.alpaca.markets"` confirmed
+- [x] Test connection: `broker.get_account_equity()` returns a value
 
 ---
 
@@ -26,7 +26,7 @@
 - [x] `get_account_equity()` → float
 - [x] `get_clock()` → market hours (is_open, next_open, next_close)
 - [x] `wait_for_fill(order_id, timeout=30)` → polls until filled, returns {filled_qty, avg_price}
-- [ ] **Verify fractional shares** — Alpaca paper supports fractional; confirm qty format for small accounts
+- [x] **Verify fractional shares** — Alpaca paper supports fractional; confirm qty format for small accounts
 
 ---
 
@@ -51,7 +51,7 @@
 - [x] `reset_daily(current_equity)` for market-open reset
 - [x] `set_position_direction(asset, direction)` for duplicate tracking
 - [x] **Redis failure handling** — Graceful: init raises RedisUnavailableError; mid-run Redis failure → HALT (kill switch) or block (duplicate)
-- [ ] **Redis running** — `redis-cli ping` returns PONG
+- [x] **Redis running** — `redis-cli ping` returns PONG
 - [ ] **Kill switch tested** — Activate, confirm loop stops placing new orders
 - [x] **Daily reset wired** — `reset_daily()` called when market opens (date change from Alpaca clock)
 

@@ -16,6 +16,12 @@ Walk-forward validated EMA crossover on SPY, QQQ, GLD. Gate: Sharpe > 0.8, Max D
 
 Take the validated backtest live against real market data via Alpaca paper trading. No real money.
 
+**What this is (and isn’t):** One process, **one symbol at a time** (default **SPY**), **daily** bars — matching the v0.1.0 validated EMA crossover on SPY. The loop is intentionally small so fills, Redis gate state, and logs are easy to reason about before adding multi-asset or intraday complexity.
+
+**Why not SPY + QQQ + GLD all at once?** Those three were validated **independently** in backtests; v0.2.0 is a **single-symbol** paper harness. Running everything in parallel would need per-symbol positions, caps, and gate keys (or a portfolio layer) — planned for later versions. You can still paper **each** symbol by changing `PAPER_SYMBOL` in `.env` and running separate sessions (or sequential test windows), not by trading all three in one loop today.
+
+**Why it can feel “slow”:** With **daily** data, the signal mostly updates when the **latest daily bar** moves (and at the day boundary). The **`PAPER_CHECK_INTERVAL`** (default **300s**) is how often the loop **re-polls** — it does not make daily EMAs react faster. Lowering the interval only increases checks/API churn; use **shorter bar intervals** (e.g. 5m / 15m) when the codebase supports them if you want intraday-style updates.
+
 **Prerequisites:**
 1. [Alpaca](https://alpaca.markets) paper account — sign up, generate API keys
 2. [Docker](https://docker.com) (for Redis via Docker Compose)
@@ -40,7 +46,21 @@ python scripts/activate_kill_switch.py   # emergency halt
 
 The loop skips trading when the market is closed, resets daily equity at market open, waits for order fills before logging, and computes P&L on exit.
 
+**Configuration (env / `config.py`):**
+
+| Variable | Role |
+|----------|------|
+| `PAPER_SYMBOL` | Ticker to trade (default `SPY`). QQQ/GLD were validated in v0.1.0; tune EMAs in `config.py` if you switch symbols. |
+| `PAPER_CHECK_INTERVAL` | Seconds between loop iterations (default `300`). |
+| `PAPER_INTERVAL` / `PAPER_PERIOD` | yfinance bar size and lookback (default daily `1d`, `60d`). |
+
+**Logs:** `data/agent_activity.jsonl` (append-only JSONL: signals, gate, errors) and `data/trades.db` (SQLite: fills / PnL). See `logging/activity_log.py` and `logging/trade_log.py`.
+
+**Restarting with an open position:** Safe. Alpaca holds the real position; on startup the loop syncs Redis’s duplicate-order flag with the broker and resumes managing the same symbol (entries/exits from live positions).
+
 **Gate to exit v0.2.0:** 4 continuous weeks of paper trading, all orders logged to SQLite, P&L dashboard accurate, kill switch tested.
+
+**Day trading / intraday (roadmap):** Daily paper is for **execution plumbing** and **discipline** with the validated strategy. **Intraday** has different noise, costs, and statistics; it’s useful for practicing **order flow, sizing, and emotional cadence**, but it does **not** automatically transfer the edge from a daily EMA strategy. A sensible path is: stabilize daily paper → validate intraday rules in backtest → paper with **short bars + wider caps** (future work).
 
 ---
 
@@ -60,6 +80,16 @@ trade-swarm-diagrams --src-only   # generate Mermaid .mmd files
 
 > `vectorbt` and `pandas-ta` are optional and require Python 3.10–3.13. On Python 3.14+, a pure-pandas fallback is used automatically.
 
+### Two UIs — why both?
+
+| | **Flask** (`trade-swarm-ui` → port **5000**) | **Streamlit** (`streamlit run dashboard/app.py`) |
+|---|----------------|------------|
+| **Purpose** | **Research & backtests** (v0.1.0 workflow): run historical simulations, inspect gate metrics, signals, experiments, diagrams. | **Live paper P&L** (v0.2.0): reads **`data/trades.db`** filled by the Alpaca paper loop (`log_trade` on fills). |
+| **Data source** | yfinance + `backtest/run.py` — whatever symbol/interval you POST from the UI (defaults in `config.py`, e.g. `EURUSD=X` / `1h`). | **SQLite only** — same `trades.db` as `logging/trade_log.py`. Not wired to Flask. |
+| **“No data”** | Normal until you open **Backtest** and run one (Dashboard then shows metrics). | Normal until the **paper loop** has logged at least one row (entries/exits). Activity without fills lives in **`agent_activity.jsonl`**, not here. |
+
+They solve different problems: **Flask = offline strategy lab**; **Streamlit = paper trading journal / P&L view**. Neither replaces the other.
+
 ---
 
 ## What's in the box
@@ -77,11 +107,12 @@ trade-swarm-diagrams --src-only   # generate Mermaid .mmd files
 | `risk/gate.py` | Basic risk gate — kill switch, daily loss limit, position size, duplicate check |
 | `risk/position_sizer.py` | 1% risk per trade sizing |
 | `logging/trade_log.py` | SQLite trade audit trail |
-| `config.py` | All tunables in one place |
+| `logging/activity_log.py` | Append-only JSONL loop audit (`data/agent_activity.jsonl`) |
+| `config.py` | All tunables in one place (paper keys via `.env`) |
 
 **Dashboards:**
-- **Flask** (`trade-swarm-ui`) — Backtest, Signal, Experiments, Diagrams
-- **Streamlit** (`streamlit run dashboard/app.py`) — P&L, trade history, cumulative returns (v0.2.0)
+- **Flask** (`trade-swarm-ui`) — Backtest, Signal, Experiments, Diagrams (historical research; not Alpaca live state)
+- **Streamlit** (`streamlit run dashboard/app.py`) — P&L, trade history, cumulative returns from **`data/trades.db`** (v0.2.0 paper fills)
 
 **Planning & tooling:**
 

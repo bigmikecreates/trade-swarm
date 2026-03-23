@@ -23,12 +23,13 @@ class AlpacaAdapter:
         self.api = tradeapi.REST(api_key, secret, base_url)
 
     def place_market_order(self, asset: str, qty: float, side: str) -> OrderResult:
+        # Alpaca: fractional qty requires time_in_force=day (GTC rejected).
         order = self.api.submit_order(
             symbol=asset,
             qty=qty,
             side=side,
             type="market",
-            time_in_force="gtc",
+            time_in_force="day",
         )
         return OrderResult(
             order_id=order.id,

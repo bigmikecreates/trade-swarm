@@ -23,7 +23,7 @@ REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
 PAPER_SYMBOL = os.environ.get("PAPER_SYMBOL", "SPY")  # Override via .env; SPY validated in v0.1.0
 PAPER_EMA_FAST = 8    # Validated for SPY (v0.1.0)
 PAPER_EMA_SLOW = 21   # Validated for SPY (v0.1.0)
-PAPER_CHECK_INTERVAL = 300  # seconds (5 min)
+PAPER_CHECK_INTERVAL = int(os.environ.get("PAPER_CHECK_INTERVAL", "300"))  # seconds; e.g. 5 min
 PAPER_PERIOD = "60d"
 PAPER_INTERVAL = "1d"  # Daily matches v0.1.0 validated strategy
 

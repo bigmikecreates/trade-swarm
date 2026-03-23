@@ -38,6 +38,9 @@ diagrams/
 
 # v0.2.0 paper trading
 data/trades.db
+data/agent_activity.jsonl
 
 # Misc
 *.log
+/docs
+/assets

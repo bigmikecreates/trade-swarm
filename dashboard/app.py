@@ -6,7 +6,8 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-DB_PATH = Path(__file__).resolve().parents[2] / "data" / "trades.db"
+# Repo root = parent of dashboard/
+DB_PATH = Path(__file__).resolve().parents[1] / "data" / "trades.db"
 
 st.set_page_config(page_title="Trade-Swarm Paper Trading", layout="wide")
 st.title("Paper Trading Dashboard")
