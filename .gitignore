@@ -38,3 +38,5 @@ diagrams/
 
 # Misc
 *.log
+data/agent_activity.jsonl
+data/trades.db
