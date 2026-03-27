@@ -246,45 +246,73 @@ def _print_summary(summary: BatchSummary):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Trade-Swarm Agent Laboratory")
+    parser = argparse.ArgumentParser(
+        description="Trade-Swarm Agent Laboratory",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s run --agent trend_signal --source synthetic
+  %(prog)s run --agent trend_signal --source yfinance --symbol SPY --period 5y
+  %(prog)s batch --agent trend_signal --splits 70/30,75/25,80/20
+  %(prog)s batch --agent trend_signal --monte-carlo 500
+  %(prog)s mechanics --runs 500
+  %(prog)s list --strategy trend_signal
+  %(prog)s eval --run exp_001
+  %(prog)s cleanup --ttl 5
+        """
+    )
     sub = parser.add_subparsers(dest="command")
 
     run_parser = sub.add_parser("run", help="Run a single experiment")
-    run_parser.add_argument("--agent", required=True)
-    run_parser.add_argument("--source", required=True, choices=lab_config.AVAILABLE_DATA_SOURCES)
-    run_parser.add_argument("--symbol", default="SYNTHETIC")
-    run_parser.add_argument("--timeframe", default="M1")
-    run_parser.add_argument("--period")
-    run_parser.add_argument("--split")
-    run_parser.add_argument("--mode", choices=["isolated", "coordinated"])
-    run_parser.add_argument("--init_cash", type=float)
-    run_parser.add_argument("--fee-rate", dest="fee_rate", type=float)
-    run_parser.add_argument("--risk-pct", dest="risk_pct", type=float)
+    run_parser.add_argument(
+        "--agent", required=True,
+        help=f"Agent to use (available: {', '.join(lab_config.AVAILABLE_AGENTS)})"
+    )
+    run_parser.add_argument(
+        "--source", required=True, 
+        choices=lab_config.AVAILABLE_DATA_SOURCES,
+        help=f"Data source (choices: {', '.join(lab_config.AVAILABLE_DATA_SOURCES)})"
+    )
+    run_parser.add_argument("--symbol", default="SYNTHETIC", help="Asset symbol (default: SYNTHETIC)")
+    run_parser.add_argument("--timeframe", default="M1", help="Timeframe (default: M1)")
+    run_parser.add_argument("--period", help="Data period (e.g., 5y, 1mo)")
+    run_parser.add_argument("--split", help="Train/test split (e.g., 70/30)")
+    run_parser.add_argument("--mode", choices=["isolated", "coordinated"], help="Execution mode")
+    run_parser.add_argument("--init_cash", type=float, help="Initial cash (default: 10000)")
+    run_parser.add_argument("--fee-rate", dest="fee_rate", type=float, help="Fee rate per trade")
+    run_parser.add_argument("--risk-pct", dest="risk_pct", type=float, help="Risk percentage per trade")
 
     batch_parser = sub.add_parser("batch", help="Run batch experiments")
-    batch_parser.add_argument("--agent", required=True)
-    batch_parser.add_argument("--source", default="yfinance", choices=lab_config.AVAILABLE_DATA_SOURCES)
-    batch_parser.add_argument("--symbol", default="SPY")
-    batch_parser.add_argument("--period", default="5y")
-    batch_parser.add_argument("--splits")
-    batch_parser.add_argument("--monte-carlo", type=int)
-    batch_parser.add_argument("--synthetic-config", default="default")
+    batch_parser.add_argument(
+        "--agent", required=True,
+        help=f"Agent to use (available: {', '.join(lab_config.AVAILABLE_AGENTS)})"
+    )
+    batch_parser.add_argument(
+        "--source", default="yfinance",
+        choices=lab_config.AVAILABLE_DATA_SOURCES,
+        help="Data source"
+    )
+    batch_parser.add_argument("--symbol", default="SPY", help="Asset symbol")
+    batch_parser.add_argument("--period", default="5y", help="Data period")
+    batch_parser.add_argument("--splits", help="Comma-separated train/test splits (e.g., 70/30,75/25)")
+    batch_parser.add_argument("--monte-carlo", type=int, help="Number of Monte Carlo runs")
+    batch_parser.add_argument("--synthetic-config", default="default", help="Synthetic GBM config name")
 
     mech_parser = sub.add_parser("mechanics", help="Run mechanics validation")
-    mech_parser.add_argument("--runs", type=int, default=500)
-    mech_parser.add_argument("--config", default="default")
+    mech_parser.add_argument("--runs", type=int, default=500, help="Number of validation runs (default: 500)")
+    mech_parser.add_argument("--config", default="default", help="Synthetic GBM config (default: default)")
 
     list_parser = sub.add_parser("list", help="List experiments")
-    list_parser.add_argument("--strategy")
-    list_parser.add_argument("--limit", type=int)
+    list_parser.add_argument("--strategy", help="Filter by strategy")
+    list_parser.add_argument("--limit", type=int, default=50, help="Max results to show (default: 50)")
 
     eval_parser = sub.add_parser("eval", help="Evaluate an experiment")
-    eval_parser.add_argument("--run", required=True)
+    eval_parser.add_argument("--run", required=True, help="Experiment run_id to evaluate")
 
     cleanup_parser = sub.add_parser("cleanup", help="Clean up old experiment directories")
-    cleanup_parser.add_argument("--ttl", type=int)
-    cleanup_parser.add_argument("--dry-run", action="store_true")
-    cleanup_parser.add_argument("--confirm", action="store_true")
+    cleanup_parser.add_argument("--ttl", type=int, help="Delete directories older than N days")
+    cleanup_parser.add_argument("--dry-run", action="store_true", help="Preview without deleting")
+    cleanup_parser.add_argument("--confirm", action="store_true", help="Skip confirmation prompt")
 
     agents_parser = sub.add_parser("agents", help="List available agents")
     agents_parser.add_argument("list", nargs="?")
@@ -297,6 +325,11 @@ def main():
     if not args.command:
         parser.print_help()
         return
+
+    # Validate agent
+    if hasattr(args, 'agent') and args.agent:
+        if args.agent not in lab_config.AVAILABLE_AGENTS:
+            parser.error(f"Unknown agent: {args.agent}. Available: {', '.join(lab_config.AVAILABLE_AGENTS)}")
 
     commands = {
         "run": cmd_run,

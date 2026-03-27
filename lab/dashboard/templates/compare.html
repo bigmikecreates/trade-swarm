@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Experiments - Trade-Swarm Lab{% endblock %}
+
+{% block content %}
+<h2>Compare Experiments</h2>
+
+{% if not comparisons %}
+<div class="card">
+    <h3>Select Experiments</h3>
+    {% if experiments %}
+    <form method="get" action="{{ url_for('compare') }}">
+        <select name="runs" multiple size="10" style="width: 100%; margin: 10px 0;">
+            {% for exp in experiments %}
+            <option value="{{ exp.run_id }}">{{ exp.name }} ({{ exp.strategy }})</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn">Compare</button>
+    </form>
+    {% else %}
+    <p>No experiments found.</p>
+    {% endif %}
+</div>
+{% else %}
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Run ID</th>
+                <th>Strategy</th>
+                <th>Return %</th>
+                <th>Win Rate</th>
+                <th>Trades</th>
+                <th>Total P&L</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in comparisons %}
+            <tr>
+                <td>{{ c.run_id }}</td>
+                <td>{{ c.strategy }}</td>
+                <td class="{% if c.return_pct >= 0 %}positive{% else %}negative{% endif %}">
+                    {{ "%.2f"|format(c.return_pct) }}%
+                </td>
+                <td>{{ "%.1f"|format(c.win_rate * 100) }}%</td>
+                <td>{{ c.num_trades }}</td>
+                <td class="{% if c.total_pnl >= 0 %}positive{% else %}negative{% endif %}">
+                    ${{ "%.2f"|format(c.total_pnl) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="card">
+    <a href="{{ url_for('compare') }}" class="btn btn-secondary">Select Different Experiments</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -13,8 +13,6 @@
 
 ### Phase 1 — Core Lab Structure ✅
 
-Built and verified end-to-end.
-
 **Files created:**
 ```
 lab/
@@ -28,7 +26,11 @@ lab/
 ├── data/
 │   ├── fetcher.py                     # Unified interface (swappable sources)
 │   ├── sources/
-│   │   └── synthetic_gbm.py           # Synthetic data source
+│   │   ├── synthetic_gbm.py           # Synthetic data source
+│   │   ├── yfinance_source.py        # Yahoo Finance
+│   │   ├── ctrader/                  # cTrader brokers
+│   │   ├── ibkr_source.py            # Interactive Brokers
+│   │   └── histdata_source.py        # Forex data
 │   └── persistence/
 │       ├── interfaces.py               # Abstract DataStore contract
 │       ├── directory_store.py          # Canonical directories
@@ -39,6 +41,15 @@ lab/
 │   ├── runner.py                     # Single experiment runner
 │   ├── batch_runner.py               # Parallel Monte Carlo + splits
 │   └── coordinator.py                # Multi-agent wiring
+├── agents/
+│   └── signal/                       # Signal generation agents
+│       ├── base.py                   # SignalAgent base class
+│       ├── register.py               # Agent registry
+│       ├── indicators.py              # Technical indicators
+│       ├── trend_agent.py            # EMA crossover
+│       ├── momentum.py               # Momentum signals
+│       ├── breakout.py               # Breakout strategy
+│       └── mean_reversion.py         # Mean reversion
 ├── cli.py                           # lab run / batch / mechanics / eval / list / cleanup
 ├── cleanup_job.py                    # Auto-cleanup cron job
 ├── config/lab_config.py
@@ -46,10 +57,10 @@ lab/
 └── requirements.txt
 ```
 
-**Makefile** created at repo root with commands:
+**Makefile** commands at repo root:
 ```bash
 make help                              # Show all commands
-make agents                            # List agents
+make test                              # Quick synthetic test
 make run AGENT=trend_signal SOURCE=synthetic
 make batch AGENT=trend_signal SPLITS="70/30,75/25"
 make mechanics RUNS=500
@@ -63,102 +74,72 @@ make clean
 
 ---
 
-## Decisions Made
+### Phase 2 — Agents Implementation ✅
 
-### Data Persistence Strategy
-- **Redis Streams** (72h retention) → **PostgreSQL** (indefinite, tables per strategy) → **Canonical Directories** (5-7 day TTL, global sweep)
-- Directories are canonical (fast-access), PostgreSQL is mirror (durable)
-- Cleanup is automatic with global sweep every 5-7 days
+All signal agents implemented:
+- [x] `signal/trend_agent.py` — EMA crossover
+- [x] `signal/mean_reversion.py` — RSI + Bollinger Bands
+- [x] `signal/breakout.py` — Donchian + ATR
+- [x] `signal/momentum.py` — Rate of change
 
-### Data Sources (Priority Order)
-| Priority | Source | Status |
-|---|---|---|
-| 1 | **yfinance** | Works now — equities, ETFs, crypto |
-| 2 | **Synthetic GBM** | Works now — mechanics validation |
-| 3 | **cTrader Open API** | After demo account setup |
-| 4 | **HISTDATA.com** | Download once, use forever |
-| 5 | **IBKR TWS** | When TWS is running |
-| 6 | **MT5** | Deferred indefinitely (Windows VPS cost) |
+---
 
-### Experiment Naming
-```
-[DD-Mon-YY][HH:MM:SS]-experiment_run-[strategy_name]
-Example: [27-Mar-26][14:32:05]-experiment_run-[mean_reversion]
-```
+### Phase 3 — Real Data Sources ✅
 
-### PostgreSQL Schema (Future)
-- One database: `trade_swarm_lab`
-- One **table per strategy** (not schema per strategy): `trend_signal_trades`, `mean_reversion_trades`, etc.
-- Shared tables: `experiments`, `strategies`
+All data sources implemented:
+- [x] `yfinance_source.py` — Equities, ETFs, crypto
+- [x] `ctrader/` — Base + IC Markets, Pepperstone, EightCap
+- [x] `histdata_source.py` — Forex M1
+- [x] `ibkr_source.py` — Interactive Brokers
 
-### Synthetic GBM
-- Used for **architecture mechanics validation only** — not strategy testing
-- Single GBM config to validate invariants: stop loss fires, P&L calculates, logs generate
-- Four configs available: default, vol_spike, gap_event, latency
-- Monte Carlo batches (500 runs) for robustness testing
+---
+
+### Critical Bug Fixes Applied
+
+1. **runner.py** — Duplicate short entry block removed
+2. **runner.py** — Short position cash flow fixed
+3. **runner.py** — Exit fees now deducted from P&L
+4. **runner.py** — Added min_trade_value threshold ($50)
+5. **runner.py** — Added min_equity_pct floor (2%)
+6. **synthetic/generator.py** — initial_price from 1.0 → 100.0
+7. **cli.py** — datetime.utcnow() → datetime.now(UTC)
+8. **directory_store.py** — Fixed pd.concat FutureWarning
 
 ---
 
 ## Remaining Phases
 
-### Phase 2 — Agents Implementation
-Implement `lab/agents/`:
-- [ ] `signal/trend_agent.py` — EMA crossover (from v0.2.0)
-- [ ] `signal/mean_reversion.py` — RSI + Bollinger Bands
-- [ ] `signal/breakout.py` — Donchian + ATR
-- [ ] `signal/momentum.py` — Rate of change
+### Phase 4 — Remaining Agents ✅
+- [x] `risk/risk_agent.py` — Full RiskAgent (VaR, drawdown, position heat)
+- [x] `regime/rule_based.py` — ADX + ATR ratio classifier
+- [x] `regime/hmm.py` — HMM classifier
+- [x] `execution/execution_agent.py` — ExecutionAgent
+- [x] `sentiment/sentiment_agent.py` — SentimentAgent (placeholder for FinBERT)
 
-### Phase 3 — Real Data Sources
-Add `lab/data/sources/`:
-- [ ] `yfinance_source.py`
-- [ ] `ctrader/base.py` + `ic_markets.py` + `pepperstone.py` + `eightcap.py`
-- [ ] `histdata_source.py`
-- [ ] `ibkr_source.py`
+### Phase 5 — Metrics Layer ✅
+- [x] `metrics/signal_metrics.py` — Signal quality, directional accuracy
+- [x] `metrics/risk_metrics.py` — VaR, CVaR, Sharpe, Sortino, Calmar
+- [x] `metrics/regime_metrics.py` — Regime distribution, stability
+- [x] `metrics/execution_metrics.py` — Slippage, fill rate, efficiency
+- [x] `metrics/sentiment_metrics.py` — Sentiment distribution, alpha
 
-### Phase 4 — Remaining Agents
-- [ ] `risk/risk_agent.py` — Full RiskAgent (VaR, drawdown, position heat)
-- [ ] `regime/rule_based.py` — ADX + ATR ratio classifier
-- [ ] `regime/hmm.py` — HMM classifier (from v0.2.0)
-- [ ] `execution/execution_agent.py` — ExecutionAgent
-- [ ] `sentiment/sentiment_agent.py` — SentimentAgent (FinBERT)
+### Phase 6 — PostgreSQL + Redis ✅
+- [x] `postgres_store.py` — Table per strategy (requires psycopg2)
+- [x] `chained_store.py` — Wire Redis Streams → PostgreSQL → Directories
+- [x] Idempotent workers (postgres_worker, directory_worker) — Already exist
+- [x] `redis_stream.py` — Already exists with production config
 
-### Phase 5 — Metrics Layer
-Add `lab/metrics/`:
-- [ ] `signal_metrics.py`
-- [ ] `risk_metrics.py`
-- [ ] `regime_metrics.py`
-- [ ] `execution_metrics.py`
-- [ ] `sentiment_metrics.py`
+### Phase 7 — Full Dashboard ✅
+- [x] Streamlit charts for all agent types
+- [x] Experiment comparison view
+- [x] Equity curve visualization
+- [x] Trade log viewer
+- [x] Signal history
 
-### Phase 6 — PostgreSQL + Redis
-- [ ] `postgres_store.py` — Table per strategy
-- [ ] Wire Redis Streams → PostgreSQL → Directories
-- [ ] Idempotent workers (postgres_worker, directory_worker)
-- [ ] `redis_stream.py` production config
-
-### Phase 7 — Full Dashboard
-- [ ] Streamlit charts for all agent types
-- [ ] Experiment comparison view
-- [ ] Equity curve visualization
-- [ ] Trade log viewer
-- [ ] Signal history
-
-### Phase 8 — Polish
-- [ ] CLI refinement
-- [ ] Documentation
-- [ ] cron setup for cleanup_job.py
-
----
-
-## How to Continue After Context Limit
-
-When context runs out, a new conversation can continue from this file. Key things to know:
-
-1. **Everything built is in `/home/bigmike/bigmike/git-projects/trade-swarm/lab/`**
-2. **Read `lab/README.md`** (if created) or this file for context
-3. **Dependencies installed:** `numpy`, `pandas`, `pyyaml`, `pyarrow`, `redis`, `streamlit`, `yfinance`
-4. **Next step:** Phase 2 — implement the agents
-5. **To run:** `make test` from repo root or `python lab/cli.py run --agent trend_signal --source synthetic`
+### Phase 8 — Polish ✅
+- [x] CLI refinement — better help, examples, validation
+- [x] Documentation — updated docs
+- [x] Cron setup — cleanup_job.py with CLI args
 
 ---
 
@@ -169,10 +150,18 @@ When context runs out, a new conversation can continue from this file. Key thing
 | `lab/synthetic/generator.py` | Generates synthetic OHLCV via GBM |
 | `lab/data/fetcher.py` | Unified data source interface |
 | `lab/harness/runner.py` | Single experiment execution |
-| `lab/harness/batch_runner.py` | Monte Carlo + split batches |
+| `lab/harness/batch_runner.py` | Monte Carlo & split batches |
 | `lab/data/persistence/directory_store.py` | Canonical directory storage |
 | `lab/data/persistence/interfaces.py` | Abstract storage contract |
 | `Makefile` | All CLI commands at repo root |
-| `lab/requirements.in` | Unpinned dependencies (edit here) |
-| `lab/requirements.txt` | Pinned lockfile (auto-generated via `make lock`) |
-| `lab/pyproject.toml` | Package metadata + optional deps (dev, postgres) |
+| `requirements.in` | Unpinned dependencies (edit here) |
+| `requirements.txt` | Pinned lockfile (auto-generated via `make lock`) |
+| `pyproject.toml` | Package metadata + optional deps (dev, postgres) |
+
+---
+
+## Notes
+
+- Synthetic GBM uses drift=0 (pure random walk) — EMA crossover loses money as expected on noise data
+- Real data testing: `make run SOURCE=yfinance SYMBOL=SPY PERIOD=5y`
+- The lab is loosely coupled and could be extracted to a separate repo or become an adapter pattern

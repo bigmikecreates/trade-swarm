@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Experiment {{ experiment.name }} - Trade-Swarm Lab{% endblock %}
+
+{% block content %}
+<h2>Experiment: {{ experiment.name }}</h2>
+
+<div class="stats">
+    <div class="stat">
+        <div class="stat-value">{{ experiment.strategy }}</div>
+        <div class="stat-label">Strategy</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">{{ experiment.data_source }}</div>
+        <div class="stat-label">Data Source</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value status-{{ experiment.status.value }}">{{ experiment.status.value }}</div>
+        <div class="stat-label">Status</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">{{ experiment.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+        <div class="stat-label">Created</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Equity Curve</h3>
+    {% if equity %}
+    <p>Final Equity: ${{ "%.2f"|format(equity[-1].equity if equity else 10000) }}</p>
+    <p>Return: <span class="{% if return_pct >= 0 %}positive{% else %}negative{% endif %}">{{ "%.2f"|format(return_pct) }}%</span></p>
+    {% else %}
+    <p>No equity data available.</p>
+    {% endif %}
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="card">
+        <h3>Trades ({{ trades|length }})</h3>
+        {% if trades %}
+        <p>Total P&L: <span class="{% if total_pnl >= 0 %}positive{% else %}negative{% endif %}">${{ "%.2f"|format(total_pnl) }}</span></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Direction</th>
+                    <th>Action</th>
+                    <th>Size</th>
+                    <th>Entry</th>
+                    <th>Exit</th>
+                    <th>P&L</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in trades[:20] %}
+                <tr>
+                    <td>{{ t.direction }}</td>
+                    <td>{{ t.action }}</td>
+                    <td>{{ "%.2f"|format(t.size) }}</td>
+                    <td>{{ "%.2f"|format(t.entry_price) if t.entry_price else '-' }}</td>
+                    <td>{{ "%.2f"|format(t.exit_price) if t.exit_price else '-' }}</td>
+                    <td class="{% if t.pnl and t.pnl > 0 %}positive{% elif t.pnl and t.pnl < 0 %}negative{% endif %}">
+                        {{ "%.2f"|format(t.pnl) if t.pnl else '-' }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No trades found.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Signals ({{ signals|length }})</h3>
+        {% if signals %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Agent</th>
+                    <th>Direction</th>
+                    <th>Strength</th>
+                    <th>Confidence</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in signals[:20] %}
+                <tr>
+                    <td>{{ s.agent_id }}</td>
+                    <td>{{ s.direction }}</td>
+                    <td>{{ "%.2f"|format(s.strength) if s.strength else '-' }}</td>
+                    <td>{{ "%.2f"|format(s.confidence) if s.confidence else '-' }}</td>
+                    <td>{{ s.timestamp[:16] if s.timestamp else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No signals found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

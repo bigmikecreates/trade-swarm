@@ -2,7 +2,7 @@
 
 A multi-agent trading system that coordinates specialised agents across signal generation, risk management, and execution to deliver adaptive, risk-aware performance in live markets.
 
-**Current version: v0.2.0** · [v0.1.0 release](https://github.com/bigmikecreates/trade-swarm/releases/tag/v0.1.0)
+**Current version: v0.3.0** · [v0.1.0 release](https://github.com/bigmikecreates/trade-swarm/releases/tag/v0.1.0)
 
 *(Check branches `release/{version_number}` for full codebase; main holds overview only).*
 
@@ -20,8 +20,8 @@ Click this [link](docs/specialist_agents/) for more information on each speciali
 | Version | Branch | Status | Summary |
 |---------|--------|--------|---------|
 | v0.1.0 | `release/v0.1.0` | Complete | Prove the signal — EMA crossover research |
-| **v0.2.0** | `release/v0.2.0` | **In progress** | Paper trading loop + basic risk rules |
-| v0.3.0 | — | Planned | Second signal agent + regime detection |
+| v0.2.0 | `release/v0.2.0` | Complete | Paper trading loop + basic risk rules |
+| **v0.3.0** | `release/v0.3.0` | **Complete** | Agent Laboratory — backtest framework |
 | v0.4.0 | — | Planned | Orchestrator + risk agent + sentiment |
 | v0.5.0 | — | Planned | Infrastructure hardening (Docker, Postgres, Grafana) |
 | v0.9.0 | — | Planned | Extended paper trading + ML confidence layer |
@@ -100,6 +100,10 @@ All strategies follow the walk-forward validation protocol defined in `planning/
 - **Gate:** Sharpe > 0.8, Max DD < 20%, Trades >= 30 on concatenated OOS equity curve
 - **Cost model:** flat 0.1% per trade (validate against paper fills in v0.2.0–v0.4.0; live in v1.0.0)
 - **Indicators:** pure pandas, no external indicator libraries
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for detailed version history.
 
 ## License
 

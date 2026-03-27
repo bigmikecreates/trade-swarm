@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Trades - Trade-Swarm Lab{% endblock %}
+
+{% block content %}
+<h2>Trade Log</h2>
+
+<div class="card">
+    <form method="get" action="{{ url_for('trades') }}">
+        <label>Select Experiment: </label>
+        <select name="run_id" onchange="this.form.submit()">
+            {% for exp in experiments %}
+            <option value="{{ exp.run_id }}" {% if exp.run_id == selected_run %}selected{% endif %}>
+                {{ exp.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<div class="stats">
+    <div class="stat"><div class="stat-value">{{ closed_count }}</div><div class="stat-label">Closed Trades</div></div>
+    <div class="stat"><div class="stat-value">{{ wins }}</div><div class="stat-label">Wins</div></div>
+    <div class="stat"><div class="stat-value">{{ losses }}</div><div class="stat-label">Losses</div></div>
+    <div class="stat"><div class="stat-value {% if total_pnl >= 0 %}positive{% else %}negative{% endif %}">${{ "%.2f"|format(total_pnl) }}</div><div class="stat-label">Total P&L</div></div>
+</div>
+
+{% if trades %}
+<div class="card">
+    <table>
+        <thead>
+            <tr><th>Direction</th><th>Action</th><th>Size</th><th>Entry</th><th>Exit</th><th>P&L</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            {% for t in trades %}
+            <tr>
+                <td>{{ t.direction }}</td>
+                <td>{{ t.action }}</td>
+                <td>{{ "%.2f"|format(t.size) }}</td>
+                <td>{{ "%.2f"|format(t.entry_price) if t.entry_price else '-' }}</td>
+                <td>{{ "%.2f"|format(t.exit_price) if t.exit_price else '-' }}</td>
+                <td class="{% if t.pnl and t.pnl > 0 %}positive{% elif t.pnl and t.pnl < 0 %}negative{% endif %}">
+                    {{ "%.2f"|format(t.pnl) if t.pnl else '-' }}
+                </td>
+                <td>{{ t.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card"><p>No trades found.</p></div>
+{% endif %}
+{% endblock %}

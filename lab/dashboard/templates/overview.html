@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Overview - Trade-Swarm Lab{% endblock %}
+
+{% block content %}
+<h2>System Overview</h2>
+
+<div class="stats">
+    <div class="stat">
+        <div class="stat-value">{{ experiments|length }}</div>
+        <div class="stat-label">Experiments</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">{{ sources|length }}</div>
+        <div class="stat-label">Data Sources</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">{{ agents|length }}</div>
+        <div class="stat-label">Agents</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>System Status</h3>
+    {% if store_connected %}
+        <p style="color: #3fb950;">✓ Data store connected</p>
+    {% else %}
+        <p style="color: #f85149;">✗ Data store not connected. Run an experiment first.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>Available Agents</h3>
+    <ul>
+    {% for agent in agents %}
+        <li>{{ agent }}</li>
+    {% endfor %}
+    </ul>
+</div>
+
+<div class="card">
+    <h3>Data Sources</h3>
+    <ul>
+    {% for source in sources %}
+        <li>{{ source }}</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %}

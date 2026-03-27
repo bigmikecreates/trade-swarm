@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Signals - Trade-Swarm Lab{% endblock %}
+
+{% block content %}
+<h2>Signal History</h2>
+
+<div class="card">
+    <form method="get" action="{{ url_for('signals') }}">
+        <label>Select Experiment: </label>
+        <select name="run_id" onchange="this.form.submit()">
+            {% for exp in experiments %}
+            <option value="{{ exp.run_id }}" {% if exp.run_id == selected_run %}selected{% endif %}>
+                {{ exp.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<div class="stats">
+    <div class="stat"><div class="stat-value">{{ total }}</div><div class="stat-label">Total Signals</div></div>
+    <div class="stat"><div class="stat-value">{{ longs }}</div><div class="stat-label">Long</div></div>
+    <div class="stat"><div class="stat-value">{{ shorts }}</div><div class="stat-label">Short</div></div>
+</div>
+
+{% if signals %}
+<div class="card">
+    <table>
+        <thead>
+            <tr><th>Agent</th><th>Direction</th><th>Strength</th><th>Confidence</th><th>Time</th></tr>
+        </thead>
+        <tbody>
+            {% for s in signals %}
+            <tr>
+                <td>{{ s.agent_id }}</td>
+                <td>{{ s.direction }}</td>
+                <td>{{ "%.2f"|format(s.strength) if s.strength else '-' }}</td>
+                <td>{{ "%.2f"|format(s.confidence) if s.confidence else '-' }}</td>
+                <td>{{ s.timestamp[:16] if s.timestamp else '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card"><p>No signals found.</p></div>
+{% endif %}
+{% endblock %}

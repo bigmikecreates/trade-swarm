@@ -7,8 +7,14 @@ pandas>=2.0.0
 pyyaml>=6.0
 pyarrow>=14.0.0
 redis>=5.0.0
-streamlit>=1.28.0
+flask>=3.0.0
 yfinance>=0.2.0
 hmmlearn>=0.3.0
 requests>=2.28.0
 ib_insync>=0.9.0
+
+[dev]
+pytest>=7.0.0
+ruff>=0.1.0
+mypy>=1.0.0
+playwright>=1.40.0

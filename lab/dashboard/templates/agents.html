@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Agents - Trade-Swarm Lab{% endblock %}
+
+{% block content %}
+<h2>Available Agents</h2>
+
+<div class="card">
+    <h3>Signal Agents</h3>
+    <ul>
+    {% for agent in agents %}
+        <li>{{ agent }}</li>
+    {% endfor %}
+    </ul>
+</div>
+
+<div class="card">
+    <h3>Data Sources</h3>
+    <ul>
+    {% for source in sources %}
+        <li>{{ source }}</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Experiments - Trade-Swarm Lab{% endblock %}
+
+{% block content %}
+<h2>Experiments</h2>
+
+<div class="card">
+    <form method="get" action="{{ url_for('experiments') }}">
+        <label>Filter by Strategy: </label>
+        <select name="strategy" onchange="this.form.submit()">
+            {% for s in strategies %}
+            <option value="{{ s }}" {% if s == selected_strategy %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<div class="stats">
+    <div class="stat">
+        <div class="stat-value">{{ total }}</div>
+        <div class="stat-label">Total</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">{{ completed }}</div>
+        <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">{{ failed }}</div>
+        <div class="stat-label">Failed</div>
+    </div>
+</div>
+
+{% if experiments %}
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Run ID</th>
+                <th>Name</th>
+                <th>Strategy</th>
+                <th>Status</th>
+                <th>Data Source</th>
+                <th>Created</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for exp in experiments %}
+            <tr>
+                <td>{{ exp.run_id }}</td>
+                <td>{{ exp.name }}</td>
+                <td>{{ exp.strategy }}</td>
+                <td class="status-{{ exp.status.value }}">{{ exp.status.value }}</td>
+                <td>{{ exp.data_source }}</td>
+                <td>{{ exp.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td><a href="{{ url_for('experiment_detail', run_id=exp.run_id) }}">View</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <p>No experiments found.</p>
+</div>
+{% endif %}
+{% endblock %}

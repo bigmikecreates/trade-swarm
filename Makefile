@@ -60,8 +60,8 @@ cleanup: ## Delete directories older than TTL days: make cleanup TTL=5
 
 # ─── Dashboard ───────────────────────────────────────────────────────────────
 
-dashboard: ## Run Streamlit dashboard
-	$(PYTHON) -m streamlit run $(LAB_DIR)/dashboard/app.py
+dashboard: ## Run Flask dashboard
+	$(PYTHON) $(LAB_DIR)/dashboard/app.py
 
 # ─── Utilities ────────────────────────────────────────────────────────────────
 
