@@ -1,0 +1,10 @@
+type: gbm
+bars: 10000
+interval: M1
+drift: 0.0
+volatility: 0.0005
+initial_price: 100.0
+gap_probability: 0.01
+gap_magnitude: 0.02
+seed: 42
+description: Overnight price gaps — stop loss + fill quality test

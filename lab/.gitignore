@@ -1,0 +1,4 @@
+# Experiment outputs — directories are auto-created
+experiments/*/
+# Exception: keep .gitkeep
+!experiments/.gitkeep

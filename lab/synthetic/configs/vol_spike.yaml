@@ -1,0 +1,11 @@
+type: gbm
+bars: 10000
+interval: M1
+drift: 0.0
+volatility: 0.0005
+initial_price: 100.0
+spike_at_bar: 5000
+spike_multiplier: 5.0
+spike_duration: 100
+seed: 42
+description: Sudden vol expansion at bar 5000 — risk gate stress test

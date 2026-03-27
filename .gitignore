@@ -19,6 +19,17 @@ package-lock.json
 *.swo
 *~
 
+# Virtual environment
+.venv/
+venv/
+
+# Experiments
+lab/experiments/
+
+# Lab pycache
+lab/__pycache__/
+lab/*/__pycache__/
+
 diagrams/
 data/agent_activity.jsonl
 data/trades.db

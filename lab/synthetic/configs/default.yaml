@@ -1,0 +1,8 @@
+type: gbm
+bars: 10000
+interval: M1
+drift: 0.0
+volatility: 0.0005
+initial_price: 100.0
+seed: 42
+description: Standard GBM for baseline architecture validation
